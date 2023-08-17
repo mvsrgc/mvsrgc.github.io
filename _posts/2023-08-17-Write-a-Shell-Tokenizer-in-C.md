@@ -65,7 +65,7 @@ So, now that the difference between a *lexeme* and a *literal* is clear,
 we can define our Token struct in `tokenize.h`:
 ```c
 typedef struct {
-    Lexeme type;
+    Lexeme lexeme;
     char *literal;
     double value;
     int position;
@@ -73,7 +73,7 @@ typedef struct {
 ```
 
 A token has lexeme, a literal, a value (which is used when the
-lexeme is NUMBER, and finally, a position in the input string.
+lexeme is NUMBER), and finally, a position in the input string.
 
 I decided to use a char *literal that can represent both string literals
 and number literals as strings, and a double value which is used to represent
