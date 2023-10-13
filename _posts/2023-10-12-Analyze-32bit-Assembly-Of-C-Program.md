@@ -5,8 +5,6 @@ categories: [Programming]
 tags: [c, assembly]
 ---
 
-# The C Program
-
 We'll be analyzing a simple C program that demonstrates a few important concepts for reverse-engineering/exploiting 32 bit binaries.
 
 ```c

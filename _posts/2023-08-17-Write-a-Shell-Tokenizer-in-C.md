@@ -1,7 +1,7 @@
 ---
 title: Write a Shell Tokenizer in C (Part 1)
 date: 2023-08-17 00:00:00
-categories: [Programming, C]
+categories: [Programming]
 tags: [c, tokenizer, shell]
 ---
 
