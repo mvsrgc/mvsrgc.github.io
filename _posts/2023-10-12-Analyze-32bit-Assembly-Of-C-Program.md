@@ -56,6 +56,4 @@ to it are the first thing stored on it's stack frame, followed by the return add
 So, the argument at `ebp+8` first has to be moved to a general-purpose register (`eax` in this case) which is done by the `mov eax, DWORD PTR [ebp+8]` instruction.
 Why? Because direct memory-to-memory transfers are not supported in the x86 architecture. Without the mov into `eax`, the instruction would look like this: `mov DWORD PTR [ebp-8], DWORD PTR [ebp+8]`, which is invalid.
 
-![Stack representation]({{ '/assets/stack.png' | relative_url }})
-
 In conclusion, we delved into the operations of stack frames, register manipulations, and specific assembly instructions. Understanding how the `sub esp, 16` creates stack space for local variables, or how arguments are passed to functions via `ebp+8`, helps in decoding more complex binaries later on. Moreover, we demonstrated why certain instructions are necessary, such as moving values to general-purpose registers before performing operations.
