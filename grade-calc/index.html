@@ -91,7 +91,7 @@
                 var minNeededGrade = parseFloat(document.getElementById('minNeededGrade').value);
                 var neededGrade = (minNeededGrade * totalWeight - weightedSum) / missingWeight;
 
-                if (minNeededGrade >= 0 && neededGrade >= 0) {
+                if (minNeededGrade >= 0) {
                     var resultDiv = document.getElementById('result');
                     resultDiv.classList.remove('alert-danger');
                     resultDiv.classList.add('alert-success');
