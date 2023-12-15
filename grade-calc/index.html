@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grade Calculator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-3">Trouvez combien il vous faut pour passer!</h2>
+        <p>Entrez vos notes et leur pondération. Laissez la note (mais pas la pondération) de l'évaluation qu'il vous manque vide.</p>
+        <form id="gradesForm">
+            <div id="inputRows" class="mb-3">
+            </div>
+            <button type="button" id="addRow" class="btn btn-primary mb-3">Add Row</button>
+            <div class="mb-3">
+                <label for="minNeededGrade" class="form-label">Double Seuil (%)</label>
+                <input type="number" class="form-control" id="minNeededGrade" placeholder="Enter Minimum Needed Grade">
+            </div>
+            <button type="button" id="calculate" class="btn btn-success">Calculate</button>
+        </form>
+        <div id="result" class="alert mt-3" style="display:none;"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('addRow').addEventListener('click', function() {
+            var newRow = document.createElement('div');
+            newRow.classList.add('form-row', 'mb-2', 'align-items-center');
+            newRow.innerHTML = `
+                <div class="col-4">
+                    <input type="number" class="form-control grade-input" placeholder="Grade (%)">
+                </div>
+                <div class="col-4">
+                    <input type="number" class="form-control weight-input" placeholder="Weight (%)">
+                </div>
+                <div class="col-4">
+                    <button type="button" class="btn btn-danger remove-row">Remove</button>
+                </div>
+            `;
+            document.getElementById('inputRows').appendChild(newRow);
+        });
+
+        document.getElementById('inputRows').addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-row')) {
+                event.target.parentElement.parentElement.remove();
+            }
+        });
+
+        document.getElementById('calculate').addEventListener('click', function() {
+            var rows = document.querySelectorAll('#inputRows .form-row');
+            var totalWeight = 0, weightedSum = 0, missingWeight = 0;
+            var isValid = true;
+            rows.forEach(row => {
+                var gradeInput = row.querySelector('.grade-input');
+                var weightInput = row.querySelector('.weight-input');
+
+                var grade = parseFloat(gradeInput.value);
+                var weight = parseFloat(weightInput.value);
+
+                if (weightInput.value && (weight < 0 || weight > 100)) {
+                    weightInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    weightInput.classList.remove('is-invalid');
+                }
+
+                if (grade) {
+                    if (grade < 0 || grade > 100) {
+                        gradeInput.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        gradeInput.classList.remove('is-invalid');
+                        weightedSum += grade * weight;
+                    }
+                } else {
+                    missingWeight += weight;
+                }
+                totalWeight += weight;
+            });
+
+            if (isValid) {
+                var minNeededGrade = parseFloat(document.getElementById('minNeededGrade').value);
+                var neededGrade = (minNeededGrade * totalWeight - weightedSum) / missingWeight;
+
+                var resultDiv = document.getElementById('result');
+                resultDiv.classList.remove('alert-danger');
+                resultDiv.classList.add('alert-success');
+                resultDiv.innerText = 'You need ' + neededGrade.toFixed(2) + '% on the final evaluation.';
+                resultDiv.style.display = 'block';
+            } else {
+                var resultDiv = document.getElementById('result');
+                resultDiv.classList.remove('alert-success');
+                resultDiv.classList.add('alert-danger');
+                resultDiv.innerText = 'Please ensure all fields are filled correctly.';
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
