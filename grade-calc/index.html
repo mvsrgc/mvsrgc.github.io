@@ -87,7 +87,7 @@
                 totalWeight += weight;
             });
 
-            if (isValid) {
+            if (isValid && missingWeight >= 0) {
                 var minNeededGrade = parseFloat(document.getElementById('minNeededGrade').value);
                 var neededGrade = (minNeededGrade * totalWeight - weightedSum) / missingWeight;
 
