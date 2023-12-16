@@ -1,117 +1,202 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Grade Calculator</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7857RZY0J"></script>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-F7857RZY0J"
+    ></script>
     <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-    gtag('config', 'G-F7857RZY0J');
+      gtag("config", "G-F7857RZY0J");
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container mt-4">
-        <h2 class="mb-3">Double Seuil Calc</h2>
-        <p>Entrez vos notes pour les travaux individuels ainsi que leur pondération.<br>Laissez la note (mais pas la pondération) de l'évaluation qui vous manque vide.</p>
-        <form id="gradesForm">
-            <div id="inputRows" class="mb-3">
-            </div>
-            <button type="button" id="addRow" class="btn btn-primary mb-3">+ Ligne</button>
-            <div class="mb-3 w-1/2">
-                <label for="minNeededGrade" class="form-label">Double Seuil (%)</label>
-                <input type="number" class="form-control" id="minNeededGrade" placeholder="Entrez le double seuil (%)">
-            </div>
-            <button type="button" id="calculate" class="btn btn-success">Calculer</button>
-        </form>
-        <div id="result" class="alert mt-3" style="display:none;"></div>
+      <h2 class="mb-3">Double Seuil Calc</h2>
+      <p>
+        Entrez vos notes pour les travaux individuels ainsi que leur
+        pondération.<br />Laissez la note (mais pas la pondération) de
+        l'évaluation qui vous manque vide.
+      </p>
+      <form id="gradesForm">
+        <div id="inputRows" class="mb-3"></div>
+        <button type="button" id="addRow" class="btn btn-primary mb-3">
+          + Ligne
+        </button>
+        <div class="mb-3 w-1/2">
+          <label for="minNeededGrade" class="form-label"
+            >Double Seuil (%)</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="minNeededGrade"
+            placeholder="Entrez le double seuil (%)"
+          />
+        </div>
+        <button type="button" id="calculate" class="btn btn-success">
+          Calculer
+        </button>
+      </form>
+      <div id="result" class="alert mt-3" style="display: none"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
-        function addRow() {
-            var newRow = document.createElement('div');
-            newRow.classList.add('form-row', 'mb-2', 'align-items-center');
-            newRow.innerHTML = `
+      function addRow() {
+        const lastRowGradeInput = document.querySelector(
+          "#inputRows .form-row:last-child .grade-input"
+        );
+        if (lastRowGradeInput) {
+          lastRowGradeInput.disabled = false;
+        }
+
+        var newRow = document.createElement("div");
+        newRow.classList.add("form-row", "mb-2", "align-items-center");
+        newRow.innerHTML = `
                 <div class="col-4">
                     <input type="number" class="form-control grade-input" placeholder="Note (%)">
                 </div>
                 <div class="col-4">
                     <input type="number" class="form-control weight-input" placeholder="Pondération (%)">
                 </div>
+                <div class="col-4">
+                    <button type="button" class="btn btn-danger remove-row">-</button>
+                </div>
             `;
-            document.getElementById('inputRows').appendChild(newRow);
+        document.getElementById("inputRows").appendChild(newRow);
+        newRow.querySelector(".grade-input").disabled = true;
+      }
+
+      document.getElementById("addRow").addEventListener("click", addRow);
+
+      document
+        .getElementById("inputRows")
+        .addEventListener("click", function (event) {
+          if (event.target.classList.contains("remove-row")) {
+            event.target.closest(".form-row").remove();
+          }
+        });
+
+      document
+        .getElementById("inputRows")
+        .addEventListener("click", function (event) {
+          if (event.target.classList.contains("remove-row")) {
+            event.target.parentElement.parentElement.remove();
+          }
+        });
+
+      function getFloatValueFromInput(input) {
+        return parseFloat(input.value) || 0;
+      }
+
+      function updateInputValidity(input, isValid) {
+        const invalidClass = "is-invalid";
+        isValid
+          ? input.classList.remove(invalidClass)
+          : input.classList.add(invalidClass);
+      }
+
+      function calculateNeededGrade(
+        weightedSum,
+        totalWeight,
+        missingWeight,
+        minNeededGrade
+      ) {
+        return (
+          (minNeededGrade * totalWeight - weightedSum) /
+          missingWeight
+        ).toFixed(2);
+      }
+
+      function updateResultDisplay(resultDiv, message, isSuccess) {
+        resultDiv.innerText = message;
+        resultDiv.classList.remove("alert-danger", "alert-success");
+        resultDiv.classList.add(isSuccess ? "alert-success" : "alert-danger");
+        resultDiv.style.display = "block";
+      }
+
+      function validateAndCalculateGrades() {
+        let isValid = true;
+        let weightedSum = 0,
+          totalWeight = 0,
+          missingWeight = 0;
+        const rows = document.querySelectorAll(".form-row");
+
+        rows.forEach((row) => {
+          const gradeInput = row.querySelector(".grade-input");
+          const weightInput = row.querySelector(".weight-input");
+
+          const grade = getFloatValueFromInput(gradeInput);
+          const weight = getFloatValueFromInput(weightInput);
+
+          if (weight && (weight < 0 || weight > 100)) {
+            updateInputValidity(weightInput, false);
+            isValid = false;
+          } else {
+            updateInputValidity(weightInput, true);
+          }
+
+          if (grade && (grade < 0 || grade > 100)) {
+            updateInputValidity(gradeInput, false);
+            isValid = false;
+          } else {
+            updateInputValidity(gradeInput, true);
+            weightedSum += grade * weight;
+          }
+
+          if (!grade) missingWeight += weight;
+          totalWeight += weight;
+        });
+
+        const resultDiv = document.getElementById("result");
+        const minNeededGrade = getFloatValueFromInput(
+          document.getElementById("minNeededGrade")
+        );
+
+        if (isValid && missingWeight > 0 && minNeededGrade >= 0) {
+          const neededGrade = calculateNeededGrade(
+            weightedSum,
+            totalWeight,
+            missingWeight,
+            minNeededGrade
+          );
+          updateResultDisplay(
+            resultDiv,
+            `Vous avez besoin de ${neededGrade}% au final.`,
+            true
+          );
+        } else {
+          updateResultDisplay(
+            resultDiv,
+            "Assurez-vous d'entrer tous les champs correctement.",
+            false
+          );
         }
+      }
 
-        document.getElementById('addRow').addEventListener('click', addRow);
-
-        document.getElementById('inputRows').addEventListener('click', function(event) {
-            if (event.target.classList.contains('remove-row')) {
-                event.target.parentElement.parentElement.remove();
-            }
+      document
+        .getElementById("calculate")
+        .addEventListener("click", function () {
+          validateAndCalculateGrades();
         });
 
-        document.getElementById('calculate').addEventListener('click', function() {
-            var rows = document.querySelectorAll('#inputRows .form-row');
-            var totalWeight = 0, weightedSum = 0, missingWeight = 0;
-            var isValid = true;
-            rows.forEach(row => {
-                var gradeInput = row.querySelector('.grade-input');
-                var weightInput = row.querySelector('.weight-input');
-
-                var grade = parseFloat(gradeInput.value);
-                var weight = parseFloat(weightInput.value);
-
-                if (weightInput.value && (weight < 0 || weight > 100)) {
-                    weightInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    weightInput.classList.remove('is-invalid');
-                }
-
-                if (grade) {
-                    if (grade < 0 || grade > 100) {
-                        gradeInput.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        gradeInput.classList.remove('is-invalid');
-                        weightedSum += grade * weight;
-                    }
-                } else {
-                    missingWeight += weight;
-                }
-                totalWeight += weight;
-            });
-
-            if (isValid && missingWeight >= 0) {
-                var minNeededGrade = parseFloat(document.getElementById('minNeededGrade').value);
-                var neededGrade = (minNeededGrade * totalWeight - weightedSum) / missingWeight;
-
-                if (minNeededGrade >= 0) {
-                    var resultDiv = document.getElementById('result');
-                    resultDiv.classList.remove('alert-danger');
-                    resultDiv.classList.add('alert-success');
-                    resultDiv.innerText = 'Vous avez besoin de ' + neededGrade.toFixed(2) + '% au final.';
-                    resultDiv.style.display = 'block';
-                }
-            } else {
-                var resultDiv = document.getElementById('result');
-                resultDiv.classList.remove('alert-success');
-                resultDiv.classList.add('alert-danger');
-                resultDiv.innerText = 'Assurez-vous d\'entrer tous les champs correctement.';
-                resultDiv.style.display = 'block';
-            }
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            addRow();
-            addRow();
-        });
+      document.addEventListener("DOMContentLoaded", function () {
+        addRow();
+        addRow();
+      });
     </script>
-
-</script>
-</body>
+  </body>
 </html>
