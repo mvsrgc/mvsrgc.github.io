@@ -87,6 +87,11 @@
         .addEventListener("click", function (event) {
           if (event.target.classList.contains("remove-row")) {
             event.target.closest(".form-row").remove();
+            const lastRowGradeInput = document.querySelector(
+                "#inputRows .form-row:last-child .grade-input"
+            );
+            lastRowGradeInput.disabled = true;
+            lastRowGradeInput.innerHTML = "";
           }
         });
 
@@ -97,6 +102,10 @@
             event.target.parentElement.parentElement.remove();
           }
         });
+
+      function disableLastGradeInput() {
+
+      }
 
       function getFloatValueFromInput(input) {
         return parseFloat(input.value) || 0;
